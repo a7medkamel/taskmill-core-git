@@ -70,17 +70,15 @@ function parse(host, pathname) {
     throw new Error('unknown host');
   }
 }
-
-function middleware(req, res, next) {
-  return Promise
-          .try(() => {
-
-            req.route = parse(req.hostname, req.path);
-          })
-          .asCallback(next);
-}
+// 
+// function middleware(req, res, next) {
+//   return Promise
+//           .try(() => {
+//             req.route = parse(req.hostname, req.path);
+//           })
+//           .asCallback(next);
+// }
 
 module.exports = {
-    parse       : parse
-  , middleware  : middleware
+    parse : parse
 };
