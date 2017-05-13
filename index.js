@@ -12,43 +12,47 @@ function get_host_metadata(host) {
     case 'www.github.run':
     case 'github.com':
       return {
-          regex   : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/blob\/([A-Za-z0-9_.-]+)\/(.+)$/g
-        , host    : 'github.com'
+          regex     : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/blob\/([A-Za-z0-9_.-]+)\/(.+)$/g
+        , host      : 'github.com'
+        , platform  : 'github'
       }
     case 'gitlab.run':
     case 'www.gitlab.run':
     case 'gitlab.com':
       return {
-          regex   : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/blob\/([A-Za-z0-9_.-]+)\/(.+)$/g
-        , host    : 'gitlab.com'
+          regex     : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/blob\/([A-Za-z0-9_.-]+)\/(.+)$/g
+        , host      : 'gitlab.com'
+        , platform  : 'gitlab'
       };
     case 'bitbucket.run':
     case 'www.bitbucket.run':
     case 'bitbucket.com':
       return {
           // https://bitbucket.run/a7medkamel/bitbucket-breadboard-library/src/ddcf536f37738de175aac84aae8daea265a2d83d/helloworld.js
-          regex   : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/src\/([A-Za-z0-9_.-]+)\/(.+)$/g
-        , host    : 'bitbucket.org'
+          regex     : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/src\/([A-Za-z0-9_.-]+)\/(.+)$/g
+        , host      : 'bitbucket.org'
+        , platform  : 'bitbucket'
       };
     default:
       if (config.has(`git.${host}`)) {
         let ret = config.get(`git.${host}`);
 
         return {
-            regex : new RegExp(ret.regex, 'g')
-          , host  : ret.host
+            regex     : new RegExp(ret.regex, 'g')
+          , host      : ret.host
+          , platform  : ret.platform
         }
       }
   }
 }
 
-function get_remote(host, username, repository) {
-  switch(host) {
-    case 'github.com':
+function get_remote(platform, host, username, repository) {
+  switch(platform) {
+    case 'github':
       return urljoin('https://' + host, username, repository + '.git');
-    case 'gitlab.com':
+    case 'gitlab':
       return urljoin('https://' + host, username, repository + '.git');
-    case 'bitbucket.org':
+    case 'bitbucket':
       // https://a7medkamel@bitbucket.org/a7medkamel/bitbucket-breadboard-library.git
       return `https://${username}@bitbucket.org/${username}/${repository}.git`;
   }
@@ -67,7 +71,7 @@ function parse(host, pathname) {
     let match = metadata.regex.exec(pathname);
     if (match) {
       return {
-          remote    : get_remote(metadata.host, match[1], match[2])
+          remote    : get_remote(metadata.platform, metadata.host, match[1], match[2])
         , branch    : match[3]
         , filename  : match[4]
         , uri       : 'https://' + urljoin(metadata.host, match[1], match[2] + '.git#' + match[3]) + '+' + match[4]
