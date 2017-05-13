@@ -30,6 +30,15 @@ function get_host_metadata(host) {
           regex   : /^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/src\/([A-Za-z0-9_.-]+)\/(.+)$/g
         , host    : 'bitbucket.org'
       };
+    default:
+      if (config.has(`git.${host}`)) {
+        let ret = config.get(`git.${host}`);
+
+        return {
+            regex : new RegExp(ret.regex, 'g')
+          , host  : ret.host
+        }
+      }
   }
 }
 
@@ -70,14 +79,6 @@ function parse(host, pathname) {
     throw new Error('unknown host');
   }
 }
-// 
-// function middleware(req, res, next) {
-//   return Promise
-//           .try(() => {
-//             req.route = parse(req.hostname, req.path);
-//           })
-//           .asCallback(next);
-// }
 
 module.exports = {
     parse : parse
