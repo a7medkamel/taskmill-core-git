@@ -3,8 +3,24 @@
 var urljoin = require('url-join')
   , Promise = require('bluebird')
   , url     = require('url')
+  , path    = require('path')
   , _       = require('lodash')
+  , config  = require('config')
   ;
+
+function stringify(platform, username, repository, filename, options = {}) {
+  let branch      = options.branch || 'master'
+    , path        = ''
+    ;
+
+  switch(platform) {
+    case 'github':
+    case 'gitlab':
+      return '/' + urljoin(username, repository, 'blob', branch, filename);
+    case 'bitbucket':
+      return '/' + urljoin(username, repository, 'src', branch, filename);
+  };
+}
 
 function get_host_metadata(host) {
   switch(host) {
@@ -42,6 +58,29 @@ function get_host_metadata(host) {
           , host      : ret.host
           , platform  : ret.platform
         }
+      }
+  }
+}
+
+function get_platform(host) {
+  switch(host) {
+    case 'github.run':
+    case 'www.github.run':
+    case 'github.com':
+      return 'github';
+    case 'gitlab.run':
+    case 'www.gitlab.run':
+    case 'gitlab.com':
+      return 'gitlab';
+    case 'bitbucket.run':
+    case 'www.bitbucket.run':
+    case 'bitbucket.com':
+      return 'bitbucket';
+    default:
+      if (config.has(`git.${host}`)) {
+        let ret = config.get(`git.${host}`);
+
+        return ret.platform;
       }
   }
 }
@@ -84,6 +123,24 @@ function parse(host, pathname) {
   }
 }
 
+function remote(remote) {
+    let url_parsed = url.parse(remote);
+
+    let { hostname, pathname } = url_parsed;
+
+    let path_parts = pathname.split(path.sep);
+
+    return {
+        username  : path_parts[1]
+      , repo      : path.basename(path_parts[2], '.git')
+      , hostname  : hostname
+      , pathname  : pathname
+    };
+  }
+
 module.exports = {
-    parse : parse
+    parse         : parse
+  , stringify     : stringify
+  , remote        : remote
+  , get_platform  : get_platform
 };
