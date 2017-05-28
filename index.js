@@ -9,9 +9,7 @@ var urljoin = require('url-join')
   ;
 
 function stringify(platform, username, repository, filename, options = {}) {
-  let branch      = options.branch || 'master'
-    , path        = ''
-    ;
+  let branch = options.branch || 'master';
 
   switch(platform) {
     case 'github':
@@ -20,6 +18,22 @@ function stringify(platform, username, repository, filename, options = {}) {
     case 'bitbucket':
       return '/' + urljoin(username, repository, 'src', branch, filename);
   };
+}
+
+function base_url(remote, pathname) {
+  let parsed = _remote(remote);
+  let hostname = parsed.hostname;
+
+  let ret = undefined;
+  if (_.startsWith(pathname, `/${hostname}`)) {
+    ret = parse(undefined, pathname);
+  } else {
+    ret = parse(hostname, pathname);
+  }
+
+  let idx = pathname.lastIndexOf(ret.filename);
+
+  return pathname.substring(0, idx);
 }
 
 function get_host_metadata(host) {
@@ -110,10 +124,13 @@ function parse(host, pathname) {
     let match = metadata.regex.exec(pathname);
     if (match) {
       return {
-          remote    : get_remote(metadata.platform, metadata.host, match[1], match[2])
-        , branch    : match[3]
-        , filename  : match[4]
-        , uri       : 'https://' + urljoin(metadata.host, match[1], match[2] + '.git#' + match[3]) + '+' + match[4]
+          remote      : get_remote(metadata.platform, metadata.host, match[1], match[2])
+        , branch      : match[3]
+        , filename    : match[4]
+        , uri         : 'https://' + urljoin(metadata.host, match[1], match[2] + '.git#' + match[3]) + '+' + match[4]
+        , platform    : metadata.platform
+        , owner       : match[1]
+        , repository  : match[2]
       };
     } else {
       throw new Error(`not a valid route: ${pathname}`);
@@ -123,7 +140,7 @@ function parse(host, pathname) {
   }
 }
 
-function remote(remote) {
+function _remote(remote) {
     let url_parsed = url.parse(remote);
 
     let { hostname, pathname } = url_parsed;
@@ -141,6 +158,7 @@ function remote(remote) {
 module.exports = {
     parse         : parse
   , stringify     : stringify
-  , remote        : remote
+  , remote        : _remote
   , get_platform  : get_platform
+  , base_url      : base_url
 };
