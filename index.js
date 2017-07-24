@@ -1,7 +1,10 @@
 "use strict";
 
+const crypto = require('crypto');
+
 var urljoin = require('url-join')
   , Promise = require('bluebird')
+  , winston = require('winston')
   , url     = require('url')
   , path    = require('path')
   , _       = require('lodash')
@@ -141,24 +144,80 @@ function parse(host, pathname) {
 }
 
 function _remote(remote) {
-    let url_parsed = url.parse(remote);
+  let url_parsed = url.parse(remote);
 
-    let { hostname, pathname } = url_parsed;
+  let { protocol, hostname, pathname } = url_parsed;
 
-    let path_parts = pathname.split(path.sep);
+  pathname = path.normalize(pathname);
 
-    return {
-        username  : path_parts[1]
-      , repo      : path.basename(path_parts[2], '.git')
-      , hostname  : hostname
-      , pathname  : pathname
-    };
+  let parts =  _.chain(pathname.split(path.sep)).tail().take(2).compact().value();
+
+  if (_.size(parts) != 2) {
+    winston.error(`remote parsing error, parts != 2`, remote, parts);
+    throw new Error('not found');
   }
 
+  let username  = parts[0]
+    , repo      = path.basename(parts[1], '.git')
+    ;
+
+  return {
+      protocol
+    , hostname
+    , pathname
+    , username
+    , repo
+  };
+}
+
+function normalize(remote) {
+  if (_.isString(remote)) {
+    remote = _remote(remote);
+  }
+
+  let { protocol, hostname, username, repo } = remote;
+
+  repo = _.toLower(repo);
+  username = _.toLower(username);
+
+  return {
+      username
+    , repo
+    , remote : url.format({ protocol, hostname, pathname : `${username}/${repo}.git` })
+  };
+}
+
+function key(remote, options = {}) {
+  if (_.isString(remote)) {
+    remote = _remote(remote);
+  }
+
+  let { remote : normalized, username } = normalize(remote);
+
+  if (options.username) {
+    username = _.toLower(options.username);
+  }
+
+  return crypto.createHmac('sha256', '').update(`${username}@${normalized}`).digest('hex');
+}
+
+function dir(remote, options = {}) {
+  if (_.isString(remote)) {
+    remote = _remote(remote);
+  }
+
+  let { hostname, pathname } = remote;
+
+  return path.join(_.toLower(hostname), _.toLower(pathname));
+}
+
 module.exports = {
-    parse         : parse
-  , stringify     : stringify
+    parse
+  , stringify
   , remote        : _remote
-  , get_platform  : get_platform
-  , base_url      : base_url
+  , get_platform
+  , base_url
+  , normalize
+  , key
+  , dir
 };
