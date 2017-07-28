@@ -102,7 +102,13 @@ function get_platform(host) {
   }
 }
 
-function get_remote(platform, host, username, repository) {
+function get_remote(host, username, repository, options = {}) {
+  let { platform } = options;
+
+  if (!platform) {
+    platform = get_platform(host);
+  }
+
   switch(platform) {
     case 'github':
       return urljoin('https://' + host, username, repository + '.git');
@@ -126,8 +132,10 @@ function parse(host, pathname) {
   if (metadata) {
     let match = metadata.regex.exec(pathname);
     if (match) {
+      let { platform } = metadata;
+
       return {
-          remote      : get_remote(metadata.platform, metadata.host, match[1], match[2])
+          remote      : get_remote(metadata.host, match[1], match[2], { platform })
         , branch      : match[3]
         , filename    : match[4]
         , uri         : 'https://' + urljoin(metadata.host, match[1], match[2] + '.git#' + match[3]) + '+' + match[4]
@@ -216,6 +224,7 @@ module.exports = {
   , stringify
   , remote        : _remote
   , get_platform
+  , get_remote
   , base_url
   , normalize
   , key
