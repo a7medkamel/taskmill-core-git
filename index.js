@@ -39,8 +39,14 @@ function base_url(remote, pathname) {
   return pathname.substring(0, idx);
 }
 
-function get_host_metadata(host) {
-  switch(host) {
+function find_hostname_config(hostname) {
+  if (config.has(`git.hosts`)) {
+    return _.find(config.get(`git.hosts`), { hostname });
+  }
+}
+
+function get_host_metadata(hostname) {
+  switch(hostname) {
     case 'github.run':
     case 'www.github.run':
     case 'github.com':
@@ -67,13 +73,12 @@ function get_host_metadata(host) {
         , platform  : 'bitbucket'
       };
     default:
-      if (config.has(`git.${host}`)) {
-        let ret = config.get(`git.${host}`);
-
+      let conf = find_hostname_config(hostname);
+      if (conf) {
         return {
-            regex     : new RegExp(ret.regex, 'g')
-          , host      : ret.host
-          , platform  : ret.platform
+            regex     : new RegExp(conf.routing.regex, 'g')
+          , host      : hostname
+          , platform  : conf.routing.platform
         }
       }
   }
@@ -94,10 +99,11 @@ function get_platform(host) {
     case 'bitbucket.com':
       return 'bitbucket';
     default:
-      if (config.has(`git.${host}`)) {
-        let ret = config.get(`git.${host}`);
+      let conf = find_hostname_config(hostname);
+      if (conf) {
+        let { platform } = conf;
 
-        return ret.platform;
+        return platform;
       }
   }
 }
