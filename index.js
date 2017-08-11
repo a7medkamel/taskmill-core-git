@@ -99,7 +99,7 @@ function get_platform(host) {
     case 'bitbucket.com':
       return 'bitbucket';
     default:
-      let conf = find_hostname_config(hostname);
+      let conf = find_hostname_config(host);
       if (conf) {
         let { platform } = conf;
 
