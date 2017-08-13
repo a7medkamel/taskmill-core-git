@@ -78,7 +78,7 @@ function get_host_metadata(hostname) {
         return {
             regex     : new RegExp(conf.routing.regex, 'g')
           , host      : hostname
-          , platform  : conf.routing.platform
+          , platform  : conf.platform
         }
       }
   }
@@ -123,6 +123,8 @@ function get_remote(host, username, repository, options = {}) {
     case 'bitbucket':
       // https://a7medkamel@bitbucket.org/a7medkamel/bitbucket-breadboard-library.git
       return `https://${username}@bitbucket.org/${username}/${repository}.git`;
+    default:
+      throw new Error('unknown git platform');
   }
 }
 
