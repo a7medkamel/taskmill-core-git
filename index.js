@@ -46,7 +46,7 @@ function make_pathname(host, owner, repo, filename, options = {}) {
   };
 }
 
-function stringify2(host, owner, repo, filename, options = {}) {
+function url(host, owner, repo, filename, options = {}) {
   let { breadboard, branch, token, platform } = options;
 
   if (!breadboard) {
@@ -62,7 +62,7 @@ function stringify2(host, owner, repo, filename, options = {}) {
     ret.searchParams.set('Authorization', `Bearer ${token}`);
   }
 
-  return ret.format();
+  return ret;
 }
 
 function base_url(remote, pathname) {
@@ -272,7 +272,7 @@ function dir(remote, options = {}) {
 module.exports = {
     parse
   , stringify
-  , stringify2
+  , url
   , remote        : _remote
   , get_platform
   , get_remote
