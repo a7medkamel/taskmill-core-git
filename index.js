@@ -51,18 +51,14 @@ function stringify2(host, owner, repo, filename, options = {}) {
     breadboard = 'https://foobar.run';
   }
 
-  let pathname  = make_pathname(host, owner, repo, filename, options)
-    , params    = new URLSearchParams()
-    ;
-
-  // todo [akamel] what if token doesn't start with Bearer
-  if (token) {
-    params.set('Authorization', 'token');
-  }
+  let pathname  = make_pathname(host, owner, repo, filename, options);
 
   let ret = new URL(urljoin(breadboard, host, pathname));
 
-  ret.searchParams = params;
+  // todo [akamel] what if token doesn't start with Bearer
+  if (token) {
+    ret.searchParams.set('Authorization', 'token');
+  }
 
   return ret.toString();
 }
