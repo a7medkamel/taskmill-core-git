@@ -174,7 +174,7 @@ function get_remote(host, username, repository, options = {}) {
 function parse(host, pathname) {
   let metadata = get_host_metadata(host);
   if (!metadata) {
-    let parsed = url.parse('https://' + pathname.substring(1)); // trim leading /
+    let parsed = new URL('https://' + pathname.substring(1)); // trim leading /
 
     metadata = get_host_metadata(parsed.host);
     pathname = pathname.substring(_.size(parsed.host) + 1);
@@ -203,7 +203,7 @@ function parse(host, pathname) {
 }
 
 function _remote(remote) {
-  let url_parsed = url.parse(remote);
+  let url_parsed = new URL(remote);
 
   let { protocol, hostname, pathname } = url_parsed;
 
