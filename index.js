@@ -2,13 +2,14 @@
 
 const crypto = require('crypto');
 
-var urljoin = require('url-join')
-  , Promise = require('bluebird')
-  , winston = require('winston')
-  , url     = require('url')
-  , path    = require('path')
-  , _       = require('lodash')
-  , config  = require('config')
+var urljoin                   = require('url-join')
+  , Promise                   = require('bluebird')
+  , winston                   = require('winston')
+  , url                       = require('url')
+  , path                      = require('path')
+  , _                         = require('lodash')
+  , config                    = require('config')
+  , { URLSearchParams, URL }  = require('url');
   ;
 
 function stringify(platform, username, repository, filename, options = {}) {
@@ -21,6 +22,49 @@ function stringify(platform, username, repository, filename, options = {}) {
     case 'bitbucket':
       return '/' + urljoin(username, repository, 'src', branch, filename);
   };
+}
+
+function make_pathname(host, owner, repo, filename, options = {}) {
+  let { branch, platform } = options;
+
+  if (!branch) {
+    branch = 'master';
+  }
+
+  if (!platform) {
+    platform = get_platform();
+  }
+
+  switch(platform) {
+    case 'github':
+    case 'gitlab':
+      return '/' + urljoin(owner, repo, 'blob', branch, filename);
+    case 'bitbucket':
+      return '/' + urljoin(owner, repo, 'src', branch, filename);
+  };
+}
+
+function stringify2(host, owner, repo, filename, options = {}) {
+  let { breadboard, branch, token, platform } = options;
+
+  if (!breadboard) {
+    breadboard = 'https://foobar.run';
+  }
+
+  let pathname  = make_pathname(host, owner, repo, filename, options)
+    , params    = new URLSearchParams()
+    ;
+
+  // todo [akamel] what if token doesn't start with Bearer
+  if (token) {
+    params.set('Authorization', 'token');
+  }
+
+  let ret = new URL(urljoin(breadboard, host, pathname));
+
+  ret.searchParams = params;
+
+  return ret.toString();
 }
 
 function base_url(remote, pathname) {
@@ -230,6 +274,7 @@ function dir(remote, options = {}) {
 module.exports = {
     parse
   , stringify
+  , stringify2
   , remote        : _remote
   , get_platform
   , get_remote
