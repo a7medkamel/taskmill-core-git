@@ -32,7 +32,7 @@ function make_pathname(host, owner, repo, filename, options = {}) {
   }
 
   if (!platform) {
-    platform = get_platform();
+    platform = get_platform(host);
   }
 
   switch(platform) {
@@ -41,6 +41,8 @@ function make_pathname(host, owner, repo, filename, options = {}) {
       return '/' + urljoin(owner, repo, 'blob', branch, filename);
     case 'bitbucket':
       return '/' + urljoin(owner, repo, 'src', branch, filename);
+    default:
+      throw new Error(`unknown platform for host ${host}`)
   };
 }
 
@@ -51,13 +53,13 @@ function stringify2(host, owner, repo, filename, options = {}) {
     breadboard = 'https://foobar.run';
   }
 
-  let pathname  = make_pathname(host, owner, repo, filename, options);
-
-  let ret = new URL(urljoin(breadboard, host, pathname));
+  let pathname  = make_pathname(host, owner, repo, filename, options)
+    , ret       = new URL(urljoin(breadboard, host, pathname))
+    ;
 
   // todo [akamel] what if token doesn't start with Bearer
   if (token) {
-    ret.searchParams.set('Authorization', 'token');
+    ret.searchParams.set('Authorization', `Bearer ${token}`);
   }
 
   return ret.toString();
