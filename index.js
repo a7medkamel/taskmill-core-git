@@ -57,16 +57,12 @@ function stringify2(host, owner, repo, filename, options = {}) {
     , ret       = new URL(urljoin(breadboard, host, pathname))
     ;
 
-  console.log(host, owner, repo, filename, options)
-  console.log(breadboard, host, pathname);
-
-  console.log(ret);
   // todo [akamel] what if token doesn't start with Bearer
   if (token) {
     ret.searchParams.set('Authorization', `Bearer ${token}`);
   }
 
-  return ret.toString();
+  return ret.format();
 }
 
 function base_url(remote, pathname) {
