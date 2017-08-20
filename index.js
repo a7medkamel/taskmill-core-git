@@ -8,7 +8,6 @@ var urljoin                   = require('url-join')
   , url                       = require('url')
   , path                      = require('path')
   , _                         = require('lodash')
-  , config                    = require('config')
   , { URLSearchParams, URL }  = require('url');
   ;
 
@@ -82,6 +81,8 @@ function base_url(remote, pathname) {
 }
 
 function find_hostname_config(hostname) {
+  // remove dep on config for web
+  let config = require('config');
   if (config.has(`git.hosts`)) {
     return _.find(config.get(`git.hosts`), { hostname });
   }
