@@ -46,7 +46,7 @@ function make_pathname(host, owner, repo, filename, options = {}) {
   };
 }
 
-function url(host, owner, repo, filename, options = {}) {
+function _url(host, owner, repo, filename, options = {}) {
   let { breadboard, branch, token, platform } = options;
 
   if (!breadboard) {
@@ -272,7 +272,7 @@ function dir(remote, options = {}) {
 module.exports = {
     parse
   , stringify
-  , url
+  , url           : _url
   , remote        : _remote
   , get_platform
   , get_remote
