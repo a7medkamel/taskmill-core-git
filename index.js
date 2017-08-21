@@ -5,10 +5,9 @@ const crypto = require('crypto');
 var urljoin                   = require('url-join')
   , Promise                   = require('bluebird')
   , winston                   = require('winston')
-  , url                       = require('url')
   , path                      = require('path')
   , _                         = require('lodash')
-  , { URLSearchParams, URL }  = require('url');
+  , { URLSearchParams, URL }  = require('universal-url');
   ;
 
 function stringify(platform, username, repository, filename, options = {}) {
@@ -242,7 +241,7 @@ function normalize(remote) {
   return {
       username
     , repo
-    , remote : url.format({ protocol, hostname, pathname : `${username}/${repo}.git` })
+    , remote : new URL({ protocol, hostname, pathname : `${username}/${repo}.git` }).toString()
   };
 }
 
