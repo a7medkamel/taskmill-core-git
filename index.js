@@ -241,7 +241,7 @@ function normalize(remote) {
   return {
       username
     , repo
-    , remote : new URL({ protocol, hostname, pathname : `${username}/${repo}.git` }).toString()
+    , remote : new URL(`${username}/${repo}.git`, `${protocol}//${hostname}`).toString()
   };
 }
 
