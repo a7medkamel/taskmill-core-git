@@ -7,7 +7,7 @@ var urljoin                   = require('url-join')
   , winston                   = require('winston')
   , path                      = require('path')
   , _                         = require('lodash')
-  , { URLSearchParams, URL }  = require('universal-url');
+  , { URLSearchParams, URL }  = require('universal-url')
   ;
 
 function stringify(platform, username, repository, filename, options = {}) {
