@@ -82,7 +82,7 @@ function base_url(remote, pathname) {
 function find_hostname_config(hostname) {
   // remove dep on config for web
   let config = require('config');
-  if (config.has(`git.hosts`)) {
+  if (config[`git.hosts`]) {
     return _.find(config.get(`git.hosts`), { hostname });
   }
 }
@@ -192,6 +192,7 @@ function parse(host, pathname) {
         , platform    : metadata.platform
         , owner       : match[1]
         , repository  : match[2]
+        , host        : host
       };
     } else {
       throw new Error(`not a valid route: ${pathname}`);
