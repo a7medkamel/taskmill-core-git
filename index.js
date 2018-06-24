@@ -182,16 +182,21 @@ function parse(host, pathname) {
   if (metadata) {
     let match = metadata.regex.exec(pathname);
     if (match) {
-      let { platform } = metadata;
+      let { platform }  = metadata
+        , owner         = match[1]
+        , repository    = match[2]
+        , branch        = match[3]
+        , filename      = match[4]
+        ;
 
       return {
           remote      : get_remote(metadata.host, match[1], match[2], { platform })
-        , branch      : match[3]
-        , filename    : match[4]
-        , uri         : 'https://' + urljoin(metadata.host, match[1], match[2] + '.git#' + match[3]) + '+' + match[4]
+        , branch
+        , filename
+        , uri         : 'https://' + urljoin(metadata.host, owner, repository + '.git#' + branch) + '+' + filename
         , platform    : metadata.platform
-        , owner       : match[1]
-        , repository  : match[2]
+        , owner
+        , repository
         , host        : host
       };
     } else {
