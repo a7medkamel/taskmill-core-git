@@ -82,7 +82,7 @@ function base_url(remote, pathname) {
 function find_hostname_config(hostname) {
   // remove dep on config for web
   let config = require('config');
-  if (config[`git.hosts`]) {
+  if (_.has(config, `git.hosts`)) {
     return _.find(config.get(`git.hosts`), { hostname });
   }
 }
